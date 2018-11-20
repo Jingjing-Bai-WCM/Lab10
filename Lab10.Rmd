@@ -1,0 +1,97 @@
+---
+title: "Lab10"
+author: "J Bai"
+date: "11/13/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Activity - Lab 10
+### 1. Generate 1000 uniform pseudorandom variates using the runif() function.
+```{r}
+set.seed(123)
+uniVars <- runif(1000)
+# compute average and variance
+mean(uniVars)
+var(uniVars)
+
+# compare your results with true mean and variance
+# the true mean should be 1/2 * (0+1) = 0.5
+# the true variance should be 1/12 * (1-0)^2 = 1/12 = 0.8333
+```
+
+### 2. Use the round() function together with runif() to generate 1000 pseudo-random integers which take values from 1 through 10. Use the table() function to check whether the observed frequencies for each value are close to what you expect.
+```{r}
+set.seed(123)
+uniform.int <- ceiling(runif(1000, min=0, max=10))
+
+table(uniform.int)
+# the expected frequency: each one should have same frequency 100
+```
+
+### 3. Use sample() function to generate 1000 pseudo-random integers which take values from 1 through 10. Use the table() function to check whether the observed frequencies for each value are close to what you expect.
+```{r}
+set.seed(123)
+random.int <- sample(1:10, 1000, replace = T)
+
+table(random.int)
+# the expected frequency: each one should have same frequency 100
+```
+
+### 4. Simulate 10000 binomial pseudo-random numbers with parameters 10 and 0.4. Let X be a Binomial(10, 0.4) random variable. Use the simulated numbers to estimate the following quantities:
+```{r}
+set.seed(999)
+X.sample <- rbinom(10000, 10, 0.4)
+
+# Pr(X <=3) 
+sum(X.sample <= 3) / 10000
+
+# Pr(X=3)
+sum(X.sample == 3) / 10000
+
+```
+
+# Assignment - Lab 10
+### 1. Write a function that calculates cumulative distribution function of a binomial random variable. Compare results from your function with pbinom() function.
+```{r}
+pbinom(-2, 23, 0.5)
+```
+
+```{r}
+my_pbinom <- function(q, size, prob) {
+  if(q >= size) { return(1) } 
+  if(q < 0) { return(0) }
+  q <- floor(q)
+  res <- 0
+  for(i in 0:q) {
+    res <- res + choose(size, i) * prob^i * (1-prob)^(size-i)
+  }
+  return(res)
+}
+
+my_pbinom(-2, 23, 0.5)
+```
+
+### 2. Write a function that runs simulations to obtain power from a one-sample t-test. Run your function (with number of simulations = 10,000 ) with n = 30, delta = 0.5, sd = 1 and sig.level = 0.05. Compare your results with power.t.test(n = 30, delta = 0.5, sd = 1, sig.level = 0.05, type = 'one.sample')
+```{r}
+power.t.test(n = 30, delta = 0.5, sd = 1, sig.level = 0.05, type = 'one.sample')
+```
+
+```{r}
+my_power <- function(n, delta, sd, sig.level = 0.05, simulations = 10000) {
+  count <- replicate(simulations, {
+    x <- rnorm(n, delta, sd)
+    t.pv <- t.test(x)$p.value
+    as.numeric(t.pv < sig.level)
+  })
+  t.power <- sum(count)/simulations
+  return(t.power)
+}
+
+my_power(n = 30, delta = 0.5, sd = 1, sig.level = 0.05)
+```
+
+
